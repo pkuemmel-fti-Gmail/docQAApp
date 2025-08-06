@@ -29,36 +29,3 @@ export interface ChatSession {
   messages: ChatMessage[];
   createdAt: Date;
 }
-
-export interface WebhookResponse {
-  output: string;
-  followUpQuestions: Array<{
-    text: string;
-    finish_reason: string;
-  }>;
-  hasGraph: boolean;
-  graphData: {
-    summary: string;
-    fullGraph: {
-      nodes: Array<{
-        id: string;
-        label: string;
-        size: number;
-        color: string;
-        cluster: number;
-      }>;
-      edges: Array<{
-        source: string;
-        target: string;
-        weight: number;
-      }>;
-    };
-    mainConcepts: string[];
-    contentGaps: string[];
-  };
-  metadata: {
-    questionCount: number;
-    usage: number;
-    timestamp: string;
-  };
-}
