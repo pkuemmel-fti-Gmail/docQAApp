@@ -41,15 +41,16 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Analyze the response with InfraNodus for knowledge graph generation
+      // Generate knowledge graph analysis (fallback since InfraNodus is in n8n)
       if (onKnowledgeGraphUpdate) {
         setIsAnalyzingKnowledge(true);
         try {
+          // For now, use fallback analysis. In production, your n8n workflow should
+          // include InfraNodus analysis and return it as part of the response
           const knowledgeAnalysis = await infraNodusService.analyzeText(response);
           onKnowledgeGraphUpdate(knowledgeAnalysis);
         } catch (error) {
           console.error('Knowledge graph analysis failed:', error);
-          // Generate fallback questions
           const fallbackQuestions = await infraNodusService.generateFollowUpQuestions(response);
           onKnowledgeGraphUpdate({
             insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
