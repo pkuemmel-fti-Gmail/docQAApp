@@ -28,12 +28,49 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
     try {
       // Send to n8n workflow with document metadata
       console.log('Sending to n8n:', { question: content, document: currentDocument });
-      const response = await sendToN8nWorkflow(content, currentDocument);
-      console.log('Received from n8n:', response);
+      const webhookResponse = await sendToN8nWorkflow(content, currentDocument);
+      console.log('Received from n8n:', webhookResponse);
+      
+      // Handle both old format (string) and new format (object)
+      let aiResponse: string;
+      let knowledgeGraphData = null;
+      
+      if (typeof webhookResponse === 'string') {
+        // Old format - just text response
+        aiResponse = webhookResponse;
+      } else if (webhookResponse && typeof webhookResponse === 'object') {
+        // New format - structured response with knowledge graph
+        aiResponse = webhookResponse.output || webhookResponse.answer || webhookResponse.response || 'No response text found';
+        
+        // Extract knowledge graph data if available
+        if (webhookResponse.hasGraph && webhookResponse.graphData) {
+          const followUpQuestions = webhookResponse.followUpQuestions?.map((q: any) => q.text || q) || [];
+          
+          knowledgeGraphData = {
+            graph: {
+              nodes: webhookResponse.graphData.fullGraph?.nodes || [],
+              edges: webhookResponse.graphData.fullGraph?.edges || []
+            },
+            insights: {
+              questions: followUpQuestions,
+              gaps: webhookResponse.graphData.contentGaps || [],
+              clusters: [{
+                id: 0,
+                label: 'Main Concepts',
+                concepts: webhookResponse.graphData.mainConcepts || []
+              }]
+            },
+            summary: webhookResponse.graphData.summary,
+            metadata: webhookResponse.metadata
+          };
+        }
+      } else {
+        aiResponse = 'Received invalid response format from n8n workflow';
+      }
       
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
-        content: response,
+        content: aiResponse,
         sender: 'assistant',
         timestamp: new Date(),
         documentId,
@@ -41,23 +78,28 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Generate knowledge graph analysis (fallback since InfraNodus is in n8n)
+      // Update knowledge graph if we have data from n8n
       if (onKnowledgeGraphUpdate) {
-        setIsAnalyzingKnowledge(true);
-        try {
-          // For now, use fallback analysis. In production, your n8n workflow should
-          // include InfraNodus analysis and return it as part of the response
-          const knowledgeAnalysis = await infraNodusService.analyzeText(response);
-          onKnowledgeGraphUpdate(knowledgeAnalysis);
-        } catch (error) {
-          console.error('Knowledge graph analysis failed:', error);
-          const fallbackQuestions = await infraNodusService.generateFollowUpQuestions(response);
-          onKnowledgeGraphUpdate({
-            insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
-            graph: { nodes: [], edges: [] }
-          });
-        } finally {
-          setIsAnalyzingKnowledge(false);
+        if (knowledgeGraphData) {
+          // Use knowledge graph data from n8n
+          console.log('Using knowledge graph data from n8n:', knowledgeGraphData);
+          onKnowledgeGraphUpdate(knowledgeGraphData);
+        } else {
+          // Fallback to local analysis if no graph data from n8n
+          setIsAnalyzingKnowledge(true);
+          try {
+            const knowledgeAnalysis = await infraNodusService.analyzeText(aiResponse);
+            onKnowledgeGraphUpdate(knowledgeAnalysis);
+          } catch (error) {
+            console.error('Knowledge graph analysis failed:', error);
+            const fallbackQuestions = await infraNodusService.generateFollowUpQuestions(aiResponse);
+            onKnowledgeGraphUpdate({
+              insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
+              graph: { nodes: [], edges: [] }
+            });
+          } finally {
+            setIsAnalyzingKnowledge(false);
+          }
         }
       }
     } catch (error) {
@@ -167,20 +209,8 @@ const sendToN8nWorkflow = async (question: string, document: Document): Promise<
       }
     }
     
-    // Handle various n8n webhook response formats
-    // Your n8n workflow returns { "output": "..." }
-    const aiResponse = data.output || data.answer || data.response || data.result || data.message;
-    
-    if (!aiResponse) {
-      console.warn('No AI response found in n8n data:', data);
-      // If data exists but no recognized response field, return the whole object as string
-      if (typeof data === 'object' && Object.keys(data).length > 0) {
-        return `Received response from n8n but couldn't find expected response field. Data: ${JSON.stringify(data)}`;
-      }
-      return 'AI processing completed, but no response text was returned from n8n workflow.';
-    }
-    
-    return aiResponse;
+    // Return the entire response object so we can extract both text and knowledge graph data
+    return data;
     
   } catch (error) {
     console.error('Error calling n8n workflow:', error);
