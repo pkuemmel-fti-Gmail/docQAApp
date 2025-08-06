@@ -198,25 +198,6 @@ function App() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {renderPage()}
       </main>
-      
-      {/* Fun Prototype Disclaimer */}
-      <footer className="border-t border-gray-800 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-              <p className="text-yellow-400 text-sm font-medium">
-                🚧 Prototype Alert! 🚧
-              </p>
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-            </div>
-            <p className="text-gray-400 text-xs max-w-2xl mx-auto">
-              This app is currently in prototype mode and may contain bugs, experimental features, or sudden bursts of artificial intelligence. 
-              Use at your own risk and remember to save your work! 🤖✨
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
