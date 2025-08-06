@@ -19,7 +19,13 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(googleDriveService.isAuthenticated());
   
   const selectedDocument = documents.find(doc => doc.id === selectedDocumentId);
-  const { messages, sendMessage, isLoading, clearMessages } = useChat(selectedDocumentId, documents);
+  const [knowledgeGraphData, setKnowledgeGraphData] = useState<any>(null);
+  
+  const { messages, sendMessage, isLoading, clearMessages } = useChat(
+    selectedDocumentId, 
+    documents, 
+    setKnowledgeGraphData
+  );
 
   // Initialize Google Drive on component mount
   React.useEffect(() => {
@@ -129,6 +135,7 @@ function App() {
             selectedDocument={selectedDocument}
             documents={documents}
             onDocumentSelect={handleDocumentSelect}
+            knowledgeGraphData={knowledgeGraphData}
           />
         );
       case 'settings':
