@@ -60,8 +60,8 @@ class GoogleKnowledgeGraphService {
 
   constructor() {
     this.apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
-    // Only enable Google KG if explicitly configured
-    this.useGoogleKG = import.meta.env.VITE_ENABLE_GOOGLE_KG === 'true' && !!this.apiKey;
+    // Enable Google KG if API key is available
+    this.useGoogleKG = !!this.apiKey;
   }
 
   // Extract entities from text and create knowledge graph
