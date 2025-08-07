@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChatInterface } from './ChatInterface';
 import { KnowledgeGraph } from './KnowledgeGraph';
+import { useChat } from '../hooks/useChat';
 import { ChatMessage, Document } from '../types';
 import { FileText } from 'lucide-react';
 
