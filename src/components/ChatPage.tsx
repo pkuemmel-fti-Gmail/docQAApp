@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChatInterface } from './ChatInterface';
 import { KnowledgeGraph } from './KnowledgeGraph';
-import { useChat } from '../hooks/useChat';
 import { ChatMessage, Document } from '../types';
 import { FileText } from 'lucide-react';
 
@@ -12,6 +11,7 @@ interface ChatPageProps {
   selectedDocument?: Document;
   documents: Document[];
   onDocumentSelect: (documentId: string) => void;
+  knowledgeGraphData?: any;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = ({
@@ -21,11 +21,9 @@ export const ChatPage: React.FC<ChatPageProps> = ({
   selectedDocument,
   documents,
   onDocumentSelect,
+  knowledgeGraphData,
 }) => {
   const [showKnowledgeGraph, setShowKnowledgeGraph] = React.useState(false);
-
-  // Get knowledge graph data from the chat hook
-  const { knowledgeGraphData } = useChat(selectedDocument?.id, documents);
 
   const handleSuggestedQuestion = (question: string) => {
     setShowKnowledgeGraph(false);
