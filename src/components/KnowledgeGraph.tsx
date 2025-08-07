@@ -50,11 +50,21 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
 }) => {
   const graphRef = useRef<HTMLDivElement>(null);
 
+  // Debug logging
+  console.log('KnowledgeGraph component props:', {
+    graphData,
+    isVisible,
+    hasGraphData: !!graphData,
+    graphDataKeys: graphData ? Object.keys(graphData) : null
+  });
+
   // Extract data from the nested structure
   const graph = graphData?.graph;
   const insights = graphData?.insights;
   const summary = graphData?.summary;
   const metadata = graphData?.metadata;
+
+  console.log('Extracted data:', { graph, insights, summary, metadata });
 
   useEffect(() => {
     if (isVisible && graph && graphRef.current) {
@@ -72,6 +82,8 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
     const nodeCount = graph.nodes?.length || 0;
     const edgeCount = graph.edges?.length || 0;
     const sourceType = metadata?.source || 'unknown';
+    
+    console.log('Rendering graph with:', { nodeCount, edgeCount, sourceType });
     
     graphRef.current.innerHTML = `
       <div class="p-6 h-full">
@@ -116,6 +128,35 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
     );
   }
 
+  // Add fallback content when no data is available
+  if (!graphData) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-6xl h-5/6 flex flex-col">
+          <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Brain className="w-6 h-6 text-purple-500" />
+              <h2 className="text-xl font-semibold text-white">Knowledge Graph Analysis</h2>
+            </div>
+            <button
+              onClick={onToggle}
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <Eye className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <Brain className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">No Knowledge Graph Data</h3>
+              <p className="text-gray-400">Ask a question to generate knowledge graph analysis</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-gray-800 rounded-xl border border-gray-700 w-full max-w-6xl h-5/6 flex flex-col">
@@ -139,7 +180,15 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
             <div
               ref={graphRef}
               className="w-full h-full bg-gray-900 rounded-lg border border-gray-600"
-            />
+            >
+              {/* Fallback content while graph loads */}
+              <div className="p-6 h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                  <p className="text-gray-400">Loading knowledge graph...</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Insights Panel */}
@@ -234,6 +283,17 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Debug Info */}
+              <div className="pt-4 border-t border-gray-700">
+                <h4 className="text-sm font-medium text-gray-400 mb-2">Debug Info</h4>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>Graph Data: {graphData ? 'Available' : 'Missing'}</p>
+                  <p>Nodes: {graph?.nodes?.length || 0}</p>
+                  <p>Edges: {graph?.edges?.length || 0}</p>
+                  <p>Questions: {insights?.questions?.length || 0}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
