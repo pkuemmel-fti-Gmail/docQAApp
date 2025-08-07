@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ChatMessage, ChatSession } from '../types';
-import { infraNodusService } from '../services/infraNodusService';
+import { googleKnowledgeGraphService } from '../services/googleKnowledgeGraphService';
 
 export const useChat = (documentId?: string, documents: Document[] = [], onKnowledgeGraphUpdate?: (data: any) => void) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -88,11 +88,11 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
           // Fallback to local analysis if no graph data from n8n
           setIsAnalyzingKnowledge(true);
           try {
-            const knowledgeAnalysis = await infraNodusService.analyzeText(aiResponse);
+            const knowledgeAnalysis = await googleKnowledgeGraphService.analyzeText(aiResponse);
             onKnowledgeGraphUpdate(knowledgeAnalysis);
           } catch (error) {
             console.error('Knowledge graph analysis failed:', error);
-            const fallbackQuestions = await infraNodusService.generateFollowUpQuestions(aiResponse);
+            const fallbackQuestions = await googleKnowledgeGraphService.generateFollowUpQuestions(aiResponse);
             onKnowledgeGraphUpdate({
               insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
               graph: { nodes: [], edges: [] }
