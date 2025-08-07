@@ -66,6 +66,9 @@ class GoogleKnowledgeGraphService {
 
   // Extract entities from text and create knowledge graph
   async analyzeText(text: string): Promise<KnowledgeGraphData> {
+    console.log('GoogleKnowledgeGraphService.analyzeText called with text length:', text.length);
+    console.log('useGoogleKG setting:', this.useGoogleKG);
+    
     if (!this.useGoogleKG) {
       console.log('Using enhanced text analysis (Google KG disabled)');
       return this.generateFallbackAnalysis(text);

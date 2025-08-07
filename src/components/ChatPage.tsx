@@ -34,6 +34,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
 
   // Auto-show knowledge graph when data is available
   React.useEffect(() => {
+    console.log('ChatPage: Knowledge graph data changed:', knowledgeGraphData);
     if (knowledgeGraphData && !showKnowledgeGraph) {
       console.log('Auto-showing knowledge graph with data:', knowledgeGraphData);
       setShowKnowledgeGraph(true);

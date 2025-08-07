@@ -57,27 +57,33 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
       setMessages(prev => [...prev, assistantMessage]);
 
       // Always run Google Knowledge Graph analysis on the AI response
-      if (onKnowledgeGraphUpdate) {
-        setIsAnalyzingKnowledge(true);
+      console.log('Starting knowledge graph analysis for AI response...');
+      setIsAnalyzingKnowledge(true);
+      try {
+        console.log('Analyzing AI response with Google Knowledge Graph...');
+        console.log('AI Response text:', aiResponse.substring(0, 200) + '...');
+        const knowledgeAnalysis = await googleKnowledgeGraphService.analyzeText(aiResponse);
+        console.log('Google Knowledge Graph analysis complete:', knowledgeAnalysis);
+        setKnowledgeGraphData(knowledgeAnalysis);
+        console.log('Knowledge graph data set in state:', knowledgeAnalysis);
+      } catch (error) {
+        console.error('Knowledge graph analysis failed:', error);
+        // Fallback to basic question generation
         try {
-          console.log('Analyzing AI response with Google Knowledge Graph...');
-          const knowledgeAnalysis = await googleKnowledgeGraphService.analyzeText(aiResponse);
-          console.log('Google Knowledge Graph analysis complete:', knowledgeAnalysis);
-          setKnowledgeGraphData(knowledgeAnalysis);
-          onKnowledgeGraphUpdate(knowledgeAnalysis);
-        } catch (error) {
-          console.error('Knowledge graph analysis failed:', error);
-          // Fallback to basic question generation
           const fallbackQuestions = await googleKnowledgeGraphService.generateFollowUpQuestions(aiResponse);
           const fallbackData = {
             insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
-            graph: { nodes: [], edges: [] }
+            graph: { nodes: [], edges: [] },
+            summary: 'Fallback analysis generated',
+            metadata: { entityCount: 0, timestamp: Date.now().toString(), source: 'fallback' }
           };
+          console.log('Using fallback knowledge graph data:', fallbackData);
           setKnowledgeGraphData(fallbackData);
-          onKnowledgeGraphUpdate(fallbackData);
-        } finally {
-          setIsAnalyzingKnowledge(false);
+        } catch (fallbackError) {
+          console.error('Fallback analysis also failed:', fallbackError);
         }
+      } finally {
+        setIsAnalyzingKnowledge(false);
       }
     } catch (error) {
       console.error('Error sending message:', error);
