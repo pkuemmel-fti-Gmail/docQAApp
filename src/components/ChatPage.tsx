@@ -26,6 +26,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
 
   const handleKnowledgeGraphUpdate = (data: any) => {
     setKnowledgeGraphData(data);
+    console.log('Knowledge graph data updated:', data);
   };
 
   const handleSuggestedQuestion = (question: string) => {
@@ -108,8 +109,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
 
       {/* Knowledge Graph Modal */}
       <KnowledgeGraph
-        graphData={knowledgeGraphData?.graph}
-        insights={knowledgeGraphData?.insights}
+        graphData={knowledgeGraphData}
         onQuestionClick={handleSuggestedQuestion}
         isVisible={showKnowledgeGraph}
         onToggle={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
