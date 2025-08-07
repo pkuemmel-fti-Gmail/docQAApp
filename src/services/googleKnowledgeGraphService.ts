@@ -460,47 +460,6 @@ class GoogleKnowledgeGraphService {
     
     return colorMap[type] || '#6B7280';
   }
-      type: 'Concept',
-      score: Math.random()
-    }));
-
-    const edges = [];
-    for (let i = 0; i < nodes.length - 1; i++) {
-      if (Math.random() > 0.7) {
-        edges.push({
-          source: nodes[i].id,
-          target: nodes[i + 1].id,
-          weight: Math.random(),
-          relationship: 'related'
-        });
-      }
-    }
-
-    return {
-      graph: { nodes, edges },
-      insights: {
-        gaps: ['Consider exploring connections between key concepts'],
-        questions: [
-          'How do these concepts relate to each other?',
-          'What additional context would be helpful?',
-          'What are the implications of these relationships?'
-        ],
-        clusters: [
-          {
-            id: 0,
-            label: 'Main Concepts',
-            concepts: uniqueWords.slice(0, 5)
-          }
-        ]
-      },
-      summary: 'Using fallback text analysis (Google Knowledge Graph unavailable)',
-      metadata: {
-        entityCount: nodes.length,
-        timestamp: Date.now().toString(),
-        source: 'fallback'
-      }
-    };
-  }
 }
 
 export const googleKnowledgeGraphService = new GoogleKnowledgeGraphService();
