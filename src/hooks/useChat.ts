@@ -33,37 +33,13 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
       
       // Handle both old format (string) and new format (object)
       let aiResponse: string;
-      let knowledgeGraphData = null;
       
       if (typeof webhookResponse === 'string') {
-        // Old format - just text response
+        // Simple format - just text response
         aiResponse = webhookResponse;
       } else if (webhookResponse && typeof webhookResponse === 'object') {
-        // New format - structured response with knowledge graph
+        // Object format - extract the text response
         aiResponse = webhookResponse.output || webhookResponse.answer || webhookResponse.response || 'No response text found';
-        
-        // Extract knowledge graph data if available
-        if (webhookResponse.hasGraph && webhookResponse.graphData) {
-          const followUpQuestions = webhookResponse.followUpQuestions?.map((q: any) => q.text || q) || [];
-          
-          knowledgeGraphData = {
-            graph: {
-              nodes: webhookResponse.graphData.fullGraph?.nodes || [],
-              edges: webhookResponse.graphData.fullGraph?.edges || []
-            },
-            insights: {
-              questions: followUpQuestions,
-              gaps: webhookResponse.graphData.contentGaps || [],
-              clusters: [{
-                id: 0,
-                label: 'Main Concepts',
-                concepts: webhookResponse.graphData.mainConcepts || []
-              }]
-            },
-            summary: webhookResponse.graphData.summary,
-            metadata: webhookResponse.metadata
-          };
-        }
       } else {
         aiResponse = 'Received invalid response format from n8n workflow';
       }
@@ -78,28 +54,24 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Update knowledge graph if we have data from n8n
+      // Always run Google Knowledge Graph analysis on the AI response
       if (onKnowledgeGraphUpdate) {
-        if (knowledgeGraphData) {
-          // Use knowledge graph data from n8n
-          console.log('Using knowledge graph data from n8n:', knowledgeGraphData);
-          onKnowledgeGraphUpdate(knowledgeGraphData);
-        } else {
-          // Fallback to local analysis if no graph data from n8n
-          setIsAnalyzingKnowledge(true);
-          try {
-            const knowledgeAnalysis = await googleKnowledgeGraphService.analyzeText(aiResponse);
-            onKnowledgeGraphUpdate(knowledgeAnalysis);
-          } catch (error) {
-            console.error('Knowledge graph analysis failed:', error);
-            const fallbackQuestions = await googleKnowledgeGraphService.generateFollowUpQuestions(aiResponse);
-            onKnowledgeGraphUpdate({
-              insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
-              graph: { nodes: [], edges: [] }
-            });
-          } finally {
-            setIsAnalyzingKnowledge(false);
-          }
+        setIsAnalyzingKnowledge(true);
+        try {
+          console.log('Analyzing AI response with Google Knowledge Graph...');
+          const knowledgeAnalysis = await googleKnowledgeGraphService.analyzeText(aiResponse);
+          console.log('Google Knowledge Graph analysis complete:', knowledgeAnalysis);
+          onKnowledgeGraphUpdate(knowledgeAnalysis);
+        } catch (error) {
+          console.error('Knowledge graph analysis failed:', error);
+          // Fallback to basic question generation
+          const fallbackQuestions = await googleKnowledgeGraphService.generateFollowUpQuestions(aiResponse);
+          onKnowledgeGraphUpdate({
+            insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
+            graph: { nodes: [], edges: [] }
+          });
+        } finally {
+          setIsAnalyzingKnowledge(false);
         }
       }
     } catch (error) {
