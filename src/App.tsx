@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Header } from './components/Header';
-import { DocumentUpload } from './components/DocumentUpload';
-import { ChatInterface } from './components/ChatInterface';
 import { DocumentsList } from './components/DocumentsList';
 import { ChatPage } from './components/ChatPage';
 import { SettingsPage } from './components/SettingsPage';
