@@ -51,11 +51,13 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
   const graphRef = useRef<HTMLDivElement>(null);
 
   // Debug logging
-  console.log('KnowledgeGraph component props:', {
+  console.log('🎨 KnowledgeGraph component received props:', {
     graphData,
     isVisible,
     hasGraphData: !!graphData,
-    graphDataKeys: graphData ? Object.keys(graphData) : null
+    graphDataKeys: graphData ? Object.keys(graphData) : null,
+    nodeCount: graphData?.graph?.nodes?.length || 0,
+    insightCount: graphData?.insights?.questions?.length || 0
   });
 
   // Extract data from the nested structure
@@ -64,7 +66,14 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
   const summary = graphData?.summary;
   const metadata = graphData?.metadata;
 
-  console.log('Extracted data:', { graph, insights, summary, metadata });
+  console.log('🎨 KnowledgeGraph extracted data:', { 
+    graph: !!graph, 
+    insights: !!insights, 
+    summary: !!summary, 
+    metadata: !!metadata,
+    nodeCount: graph?.nodes?.length || 0,
+    edgeCount: graph?.edges?.length || 0
+  });
 
   useEffect(() => {
     if (isVisible && graph && graphRef.current) {
