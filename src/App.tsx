@@ -6,7 +6,7 @@ import { SettingsPage } from './components/SettingsPage';
 import { useChat } from './hooks/useChat';
 import { googleDriveService } from './services/googleDriveService';
 import { Document } from './types';
-import { FileText, MessageSquare, Settings } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 type Page = 'home' | 'documents' | 'chat' | 'settings';
 

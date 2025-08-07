@@ -10,8 +10,8 @@ interface GoogleDriveFile {
 
 class GoogleDriveService {
   private gapi: any = null;
-  private isInitialized = false;
-  private isAuthenticated = false;
+  private _isInitialized = false;
+  private _isAuthenticated = false;
 
   constructor() {
     this.loadGoogleAPI();
@@ -65,8 +65,8 @@ class GoogleDriveService {
         scope: 'https://www.googleapis.com/auth/drive.file',
       });
 
-      this.isInitialized = true;
-      this.isAuthenticated = this.gapi.auth2.getAuthInstance().isSignedIn.get();
+      this._isInitialized = true;
+      this._isAuthenticated = this.gapi.auth2.getAuthInstance().isSignedIn.get();
     } catch (error) {
       console.error('Failed to initialize Google Drive API:', error);
       throw error;
@@ -74,15 +74,15 @@ class GoogleDriveService {
   }
 
   isInitialized(): boolean {
-    return this.isInitialized;
+    return this._isInitialized;
   }
 
   isAuthenticated(): boolean {
-    return this.isAuthenticated && this.gapi?.auth2?.getAuthInstance()?.isSignedIn?.get();
+    return this._isAuthenticated && this.gapi?.auth2?.getAuthInstance()?.isSignedIn?.get();
   }
 
   async authenticate(): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this._isInitialized) {
       await this.initialize();
     }
 
@@ -92,11 +92,11 @@ class GoogleDriveService {
       await authInstance.signIn();
     }
     
-    this.isAuthenticated = authInstance.isSignedIn.get();
+    this._isAuthenticated = authInstance.isSignedIn.get();
   }
 
   async uploadFile(file: File): Promise<GoogleDriveFile> {
-    if (!this.isAuthenticated) {
+    if (!this._isAuthenticated) {
       throw new Error('Not authenticated with Google Drive');
     }
 
@@ -133,7 +133,7 @@ class GoogleDriveService {
   }
 
   async listDocuments(): Promise<GoogleDriveFile[]> {
-    if (!this.isAuthenticated) {
+    if (!this._isAuthenticated) {
       throw new Error('Not authenticated with Google Drive');
     }
 
@@ -147,7 +147,7 @@ class GoogleDriveService {
   }
 
   async deleteFile(fileId: string): Promise<void> {
-    if (!this.isAuthenticated) {
+    if (!this._isAuthenticated) {
       throw new Error('Not authenticated with Google Drive');
     }
 
