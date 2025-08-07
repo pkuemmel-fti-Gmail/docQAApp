@@ -232,9 +232,14 @@ class GoogleKnowledgeGraphService {
 
   // Check if two entities co-occur in text
   private checkCoOccurrence(entity1: string, entity2: string, text: string): boolean {
+    // Safety check for undefined values
+    if (!entity1 || !entity2 || !text) {
+      return false;
+    }
+    
     const sentences = text.split(/[.!?]+/);
     return sentences.some(sentence => 
-      sentence.toLowerCase().includes(entity1.toLowerCase()) && 
+      sentence && sentence.toLowerCase().includes(entity1.toLowerCase()) && 
       sentence.toLowerCase().includes(entity2.toLowerCase())
     );
   }
