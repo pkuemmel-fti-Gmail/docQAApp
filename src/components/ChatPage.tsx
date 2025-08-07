@@ -21,18 +21,23 @@ export const ChatPage: React.FC<ChatPageProps> = ({
   documents,
   onDocumentSelect,
 }) => {
-  const [knowledgeGraphData, setKnowledgeGraphData] = React.useState<any>(null);
   const [showKnowledgeGraph, setShowKnowledgeGraph] = React.useState(false);
 
-  const handleKnowledgeGraphUpdate = (data: any) => {
-    setKnowledgeGraphData(data);
-    console.log('Knowledge graph data updated:', data);
-  };
+  // Get knowledge graph data from the chat hook
+  const { knowledgeGraphData } = useChat(selectedDocument?.id, documents);
 
   const handleSuggestedQuestion = (question: string) => {
     setShowKnowledgeGraph(false);
     onSendMessage(question);
   };
+
+  // Auto-show knowledge graph when data is available
+  React.useEffect(() => {
+    if (knowledgeGraphData && !showKnowledgeGraph) {
+      console.log('Auto-showing knowledge graph with data:', knowledgeGraphData);
+      setShowKnowledgeGraph(true);
+    }
+  }, [knowledgeGraphData]);
 
   return (
     <div className="space-y-6">
@@ -96,12 +101,9 @@ export const ChatPage: React.FC<ChatPageProps> = ({
           <div className="h-[calc(100vh-16rem)]">
             <ChatInterface
               messages={messages}
-              onSendMessage={(message) => {
-                onSendMessage(message);
-              }}
+              onSendMessage={onSendMessage}
               isLoading={isLoading}
               selectedDocumentName={selectedDocument?.name}
-              onKnowledgeGraphUpdate={handleKnowledgeGraphUpdate}
             />
           </div>
         </div>

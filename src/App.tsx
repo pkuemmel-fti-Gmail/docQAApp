@@ -19,12 +19,10 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(googleDriveService.isAuthenticated());
   
   const selectedDocument = documents.find(doc => doc.id === selectedDocumentId);
-  const [knowledgeGraphData, setKnowledgeGraphData] = useState<any>(null);
   
-  const { messages, sendMessage, isLoading, clearMessages } = useChat(
-    selectedDocumentId, 
-    documents, 
-    setKnowledgeGraphData
+  const { messages, sendMessage, isLoading, clearMessages, knowledgeGraphData } = useChat(
+    selectedDocumentId,
+    documents
   );
 
   // Initialize Google Drive on component mount

@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
 import { ChatMessage, ChatSession } from '../types';
 import { googleKnowledgeGraphService } from '../services/googleKnowledgeGraphService';
+import { Document } from '../types';
 
 export const useChat = (documentId?: string, documents: Document[] = [], onKnowledgeGraphUpdate?: (data: any) => void) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzingKnowledge, setIsAnalyzingKnowledge] = useState(false);
+  const [knowledgeGraphData, setKnowledgeGraphData] = useState<any>(null);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!documentId) return;
@@ -61,15 +63,18 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
           console.log('Analyzing AI response with Google Knowledge Graph...');
           const knowledgeAnalysis = await googleKnowledgeGraphService.analyzeText(aiResponse);
           console.log('Google Knowledge Graph analysis complete:', knowledgeAnalysis);
+          setKnowledgeGraphData(knowledgeAnalysis);
           onKnowledgeGraphUpdate(knowledgeAnalysis);
         } catch (error) {
           console.error('Knowledge graph analysis failed:', error);
           // Fallback to basic question generation
           const fallbackQuestions = await googleKnowledgeGraphService.generateFollowUpQuestions(aiResponse);
-          onKnowledgeGraphUpdate({
+          const fallbackData = {
             insights: { questions: fallbackQuestions, gaps: [], clusters: [] },
             graph: { nodes: [], edges: [] }
-          });
+          };
+          setKnowledgeGraphData(fallbackData);
+          onKnowledgeGraphUpdate(fallbackData);
         } finally {
           setIsAnalyzingKnowledge(false);
         }
@@ -93,6 +98,7 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
 
   const clearMessages = useCallback(() => {
     setMessages([]);
+    setKnowledgeGraphData(null);
   }, []);
 
   return {
@@ -100,6 +106,7 @@ export const useChat = (documentId?: string, documents: Document[] = [], onKnowl
     sendMessage,
     isLoading,
     isAnalyzingKnowledge,
+    knowledgeGraphData,
     clearMessages,
   };
 };

@@ -8,7 +8,6 @@ interface ChatInterfaceProps {
   onSendMessage: (message: string) => void;
   isLoading: boolean;
   selectedDocumentName?: string;
-  onKnowledgeGraphUpdate?: (data: any) => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -16,12 +15,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onSendMessage,
   isLoading,
   selectedDocumentName,
-  onKnowledgeGraphUpdate,
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isAnalyzingKnowledge, setIsAnalyzingKnowledge] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,15 +33,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (inputMessage.trim() && !isLoading) {
       const message = inputMessage.trim();
       setInputMessage('');
-      
-      // Send message and handle knowledge graph analysis
       onSendMessage(message);
-      
-      if (onKnowledgeGraphUpdate) {
-        setIsAnalyzingKnowledge(true);
-        // The knowledge graph analysis will be handled in the useChat hook
-        setTimeout(() => setIsAnalyzingKnowledge(false), 3000); // Reset after 3 seconds
-      }
     }
   };
 
@@ -138,24 +127,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {isAnalyzingKnowledge && (
-          <div className="flex justify-start">
-            <div className="flex items-start space-x-3 max-w-3xl">
-              <div className="p-2.5 rounded-xl bg-purple-600">
-                <Bot className="w-4 h-4 text-white" />
-              </div>
-              <div className="p-4 rounded-2xl bg-purple-900/20 border border-purple-700/30">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <span className="text-purple-200 text-sm ml-2">Analyzing knowledge patterns...</span>
                 </div>
               </div>
             </div>
